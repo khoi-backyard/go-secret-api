@@ -10,15 +10,53 @@
 package swagger
 
 import (
+	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func AddSecret(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+type secretPostBody struct {
+	Secret           string `json:"secret"`
+	ExpireAfterViews int    `json:"expireAfterViews"`
+	ExpireAfter      int    `json:"expireAfter"`
 }
 
-func GetSecretByHash(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+func AddSecret(s *inMemoryStore) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		decoder := json.NewDecoder(r.Body)
+		var postData secretPostBody
+		err := decoder.Decode(&postData)
+
+		if err != nil {
+			panic(err)
+		}
+
+		secret, err := s.addSecret(postData.Secret, postData.ExpireAfterViews, postData.ExpireAfter)
+
+		if err != nil {
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusCreated)
+
+		if err := json.NewEncoder(w).Encode(secret); err != nil {
+			panic(err)
+		}
+	}
+}
+
+func GetSecretByHash(s *inMemoryStore) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		secret, err := s.readSecret(mux.Vars(r)["hash"])
+		if err != nil {
+			panic(err)
+		}
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(secret); err != nil {
+			panic(err)
+		}
+	}
 }

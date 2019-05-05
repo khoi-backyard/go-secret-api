@@ -49,6 +49,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World!")
 }
 
+var storage = newInMemoryStore()
+
 var routes = Routes{
 	Route{
 		"Index",
@@ -61,13 +63,13 @@ var routes = Routes{
 		"AddSecret",
 		strings.ToUpper("Post"),
 		"/v1/secret",
-		AddSecret,
+		AddSecret(storage),
 	},
 
 	Route{
 		"GetSecretByHash",
 		strings.ToUpper("Get"),
 		"/v1/secret/{hash}",
-		GetSecretByHash,
+		GetSecretByHash(storage),
 	},
 }

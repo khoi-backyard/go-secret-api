@@ -16,17 +16,17 @@ import (
 type Secret struct {
 
 	// Unique hash to identify the secrets
-	Hash string `json:"hash,omitempty"`
+	Hash string `json:"hash"`
 
 	// The secret itself
-	SecretText string `json:"secretText,omitempty"`
+	SecretText string `json:"secretText"`
 
 	// The date and time of the creation
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	// The secret cannot be reached after this time
-	ExpiresAt time.Time `json:"expiresAt,omitempty"`
+	ExpiresAt time.Time `json:"expiresAt"`
 
 	// How many times the secret can be viewed
-	RemainingViews int32 `json:"remainingViews,omitempty"`
+	RemainingViews int32 `json:"remainingViews"`
 }
