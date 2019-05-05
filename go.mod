@@ -10,6 +10,7 @@ require (
 	github.com/go-delve/delve v1.2.0 // indirect
 	github.com/golangci/golangci-lint v1.16.0 // indirect
 	github.com/google/uuid v1.1.1
+	github.com/gorilla/handlers v1.4.0 // indirect
 	github.com/gorilla/mux v1.7.1
 	github.com/josharian/impl v0.0.0-20180228163738-3d0f908298c4 // indirect
 	github.com/kisielk/errcheck v1.2.0 // indirect

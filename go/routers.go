@@ -10,6 +10,7 @@
 package swagger
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -30,6 +31,7 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	sh := http.StripPrefix("/v1/ui/", http.FileServer(http.Dir("./swaggerui/")))
 	router.PathPrefix("/v1/ui/").Handler(sh)
+
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc
@@ -43,6 +45,14 @@ func NewRouter() *mux.Router {
 	}
 
 	return router
+}
+
+func writeJSON(w http.ResponseWriter, v interface{}, status int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	w.WriteHeader(status)
+
+	json.NewEncoder(w).Encode(v)
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {

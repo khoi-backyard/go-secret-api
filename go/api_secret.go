@@ -22,6 +22,16 @@ type secretPostBody struct {
 	ExpireAfter      int    `json:"expireAfter"`
 }
 
+type JsonError struct {
+	Message string `json:"message"`
+}
+
+func respondWithError(err error, w http.ResponseWriter, code int) {
+	writeJSON(w, &JsonError{
+		Message: err.Error(),
+	}, code)
+}
+
 func AddSecret(s *inMemoryStore) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
@@ -29,20 +39,23 @@ func AddSecret(s *inMemoryStore) func(http.ResponseWriter, *http.Request) {
 		err := decoder.Decode(&postData)
 
 		if err != nil {
-			panic(err)
+			respondWithError(err, w, http.StatusInternalServerError)
+			return
 		}
 
 		secret, err := s.addSecret(postData.Secret, postData.ExpireAfterViews, postData.ExpireAfter)
 
 		if err != nil {
-			panic(err)
+			respondWithError(err, w, http.StatusInternalServerError)
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusCreated)
 
 		if err := json.NewEncoder(w).Encode(secret); err != nil {
-			panic(err)
+			respondWithError(err, w, http.StatusInternalServerError)
+			return
 		}
 	}
 }
@@ -51,12 +64,14 @@ func GetSecretByHash(s *inMemoryStore) func(http.ResponseWriter, *http.Request) 
 	return func(w http.ResponseWriter, r *http.Request) {
 		secret, err := s.readSecret(mux.Vars(r)["hash"])
 		if err != nil {
-			panic(err)
+			respondWithError(err, w, http.StatusInternalServerError)
+			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(secret); err != nil {
-			panic(err)
+			respondWithError(err, w, http.StatusInternalServerError)
+			return
 		}
 	}
 }
